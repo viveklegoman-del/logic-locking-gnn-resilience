@@ -1,4 +1,34 @@
- '''Wire Insertion / Dummy Gates:
+'''DeMorgan's Rule Logical Transform:'''
+
+def apply_demorgan(input_path, output_path):
+    '''Apply De Morgan: NAND→OR(NOT,NOT...), NOR→AND(NOT,NOT...)'''
+    with open(input_path) as f:
+        lines = f.readlines()
+    out = []
+    inv_count = 0
+    pattern = re.compile(r'^\s*(\w+)\s*=\s*(\w+)\s*\(([^)]+)\)', re.IGNORECASE)
+    for line in lines:
+        m = pattern.match(line.strip())
+        if m:
+            out_wire, gtype, in_str = m.groups()
+            gtype = gtype.upper()
+            in_wires = [w.strip() for w in in_str.split(',')]
+            if gtype in ('NAND', 'NOR') and len(in_wires) >= 2:
+                inv_wires = []
+                for w in in_wires:
+                    inv_count += 1
+                    inv = f'dm_inv_{inv_count}'
+                    out.append(f'{inv} = NOT({w})\n')
+                    inv_wires.append(inv)
+                new_gate = 'OR' if gtype == 'NAND' else 'AND'
+                out.append(f'{out_wire} = {new_gate}({", ".join(inv_wires)})\n')
+                continue
+        out.append(line)
+    with open(output_path, 'w') as f:
+        f.writelines(out)
+
+
+'''Wire Insertion / Dummy Gates:
     Scatters fake key-input-driven gates throughout the ENTIRE circuit
     (not just near the real lock block), so the GNN can no longer use
     'gates near a KEYINPUT' as a structural signature for the lock block.'''
