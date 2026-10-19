@@ -152,3 +152,76 @@ def apply_random_perturbation(input_path, output_path, num_dummy_gates=50, seed=
     with open(output_path, 'w') as f:
         f.writelines(out)
     return added
+
+ '''Cofactoring: Find the best wire to cofactor on: the non-key internal wire
+    with the highest fan-out that feeds into the Anti-SAT region
+    (i.e., into a gate that also has a key input as a sibling).'''
+
+def find_cofactor_target(bench_path, n_candidates=5):
+  
+    key_inputs = set()
+    gate_inputs = {}   # wire → list of input wires
+    fanout = {}       
+ 
+    with open(bench_path) as f:
+        for line in f:
+            s = line.strip()
+            if 'keyinput' in s.lower() and s.upper().startswith('INPUT('):
+                key_inputs.add(s[s.find('(')+1:s.find(')')])
+            m = GATE_LINE.match(s)
+            if m:
+                out, _, in_str = m.groups()
+                ins = [w.strip() for w in in_str.split(',')]
+                gate_inputs[out] = ins
+                for w in ins:
+                    fanout[w] = fanout.get(w, 0) + 1
+ 
+    # Gates that directly touch a key input
+    key_adjacent_gates = set()
+    for out, ins in gate_inputs.items():
+        if any(w in key_inputs for w in ins):
+            key_adjacent_gates.add(out)
+ 
+    # Non-key wires that feed INTO key-adjacent gates
+    candidates = []
+    for out, ins in gate_inputs.items():
+        if out in key_adjacent_gates:
+            for w in ins:
+                if w not in key_inputs and w in fanout:
+                    candidates.append((fanout[w], w))
+ 
+    candidates.sort(reverse=True)
+    # Return top candidates (deduplicated)
+    seen = set()
+    result = []
+    for _, w in candidates:
+        if w not in seen:
+            result.append(w)
+            seen.add(w)
+        if len(result) >= n_candidates:
+            break
+    return result
+ 
+ 
+def _get_transitive_fanout_cone(wire, gate_inputs, max_depth=6):
+    '''BFS: collect all gates reachable downstream from wire within max_depth hops.
+    Returns set of gate output wire names.'''
+    
+    driven_by = {}
+    for out, ins in gate_inputs.items():
+        for w in ins:
+            driven_by.setdefault(w, set()).add(out)
+ 
+    cone = set()
+    frontier = {wire}
+    for _ in range(max_depth):
+        next_frontier = set()
+        for w in frontier:
+            for gate in driven_by.get(w, set()):
+                if gate not in cone:
+                    cone.add(gate)
+                    next_frontier.add(gate)
+        frontier = next_frontier
+        if not frontier:
+            break
+    return cone
