@@ -27,6 +27,43 @@ def apply_demorgan(input_path, output_path):
     with open(output_path, 'w') as f:
         f.writelines(out)
 
+def apply_demorgan_transformation(lines):
+    output_lines = []
+    inv_count = 0
+    for line in lines:
+        line_str = line.strip()
+        if not line_str or line_str.startswith('#') or line_str.upper().startswith(('INPUT', 'OUTPUT')):
+            output_lines.append(line)
+            continue
+
+        if '=' in line_str:
+            parts = line_str.split('=')
+            out_wire = parts[0].strip()
+            rhs = parts[1].strip()
+            gtype = rhs.split('(')[0].strip().upper()
+
+            if '(' in rhs and ')' in rhs:
+                in_wires_str = rhs[rhs.find('(')+1:rhs.rfind(')')]
+                in_wires = [w.strip() for w in in_wires_str.split(',') if w.strip()]
+
+                if gtype in ['AND', 'OR', 'NAND', 'NOR']:
+                    inv_inputs = []
+                    for w in in_wires:
+                        inv_count += 1
+                        inv_wire = f"dm_inv_{inv_count}"
+                        output_lines.append(f"{inv_wire} = NOT({w})")
+                        inv_inputs.append(inv_wire)
+
+                    dual_map = {'AND': 'NOR', 'OR': 'NAND', 'NAND': 'OR', 'NOR': 'AND'}
+                    new_gtype = dual_map[gtype]
+                    output_lines.append(f"{out_wire} = {new_gtype}({', '.join(inv_inputs)})")
+                else:
+                    output_lines.append(line)
+            else:
+                output_lines.append(line)
+        else:
+            output_lines.append(line)
+    return output_lines
 
 '''Wire Insertion / Dummy Gates:
     Scatters fake key-input-driven gates throughout the ENTIRE circuit
