@@ -3,7 +3,7 @@
 Research project exploring how structural transformations and alternative logic-locking schemes affect **GNNUnlock**, a graph-neural-network-based attack that classifies gates in a locked circuit as protection-logic (key/lock) gates or ordinary logic.
 
 **Research collaboration:** Prof. Kyle Juretus  
-**Tools:** Python, Perl, Verilog/bench netlists, GraphSAINT, PyTorch, NumPy, SciPy, NetworkX, Matplotlib, Google Colab, Terminal
+**Tools:** Python, Perl, Verilog/bench netlists, GraphSAINT, PyTorch, NumPy, SciPy, NetworkX, Matplotlib, Google Colab, Terminal, Git
 
 ## Overview
 
@@ -113,9 +113,7 @@ These CAC results are near chance-level for a two-class classification task, acc
 
 ## Repository Contents
 
-The research code snippets are from terminal through VS code and Colab notebooks. A lot of the code I used was redundant and scattered across multiple notebooks, so I put in the important ones that are easier to understand. 
-
-| Notebook | Apparent purpose |
+The research code snippets are from terminal through VS code and Colab notebooks. A lot of the code I used was redundant and scattered across multiple notebooks, so I put in some of the important ones that are easier to understand. I did not put all my code.
 
 The notebooks (I did not upload them here, scattered) include code for netlist parsing, graph generation, GraphSAINT training, GraphSAGE creation, prediction extraction, accuracy/confidence calculations, and visualization. They also contain environment-specific paths, so they currently target Google Colab rather than a clean local installation.
 
