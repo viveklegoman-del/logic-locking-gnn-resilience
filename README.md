@@ -128,19 +128,11 @@ At a high level, the notebooks follow this workflow:
 5. **Measure results.** Compare predicted gate classes with labels and report accuracy and, in some notebooks, confidence scores or class-level metrics.
 6. **Inspect graph structure.** Use NetworkX and Matplotlib to visualize circuits or regions around predicted lock gates.
 
-Exact steps, training splits, label conventions, and output paths vary between notebooks. In particular, some notebooks patch upstream training/parser code and some contain multiple alternative implementations. Re-run a notebook from its first setup cell and verify its train/validation/test split before treating its results as reproducible.
+Exact steps, training splits, label conventions, and output paths vary between notebooks. In particular, some notebooks patch upstream training/parser code and some contain multiple alternative implementations. 
 
 ## Running the Notebooks
 
 The supplied notebooks are **Google Colab-oriented** and are not currently packaged as a reproducible command-line application.
-
-For a new run:
-
-1. Open the chosen notebook in Google Colab.
-2. Run its setup cells to obtain the required GNNUnlock and GraphSAINT repositories and install dependencies.
-3. Confirm that the expected circuit datasets are available and that the notebook's `/content/...` paths match the files in the runtime.
-4. Run the notebook from top to bottom. Do not skip setup/helper cells that define functions used later.
-5. Save the generated predictions, logs, plots, and metric tables with the experiment configuration and train/test split.
 
 The upstream GNNUnlock project documents its own dependencies and GraphSAINT setup in its [README](https://github.com/DfX-NYUAD/GNNUnlock). Dependency versions and training commands may need adjustment for the current Colab runtime. Because the provided notebooks have overlapping and environment-specific code, there is no single verified command that reproduces every reported result.
 
